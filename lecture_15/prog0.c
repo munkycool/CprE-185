@@ -45,7 +45,7 @@ int main() {
         printf("\n ----- Enter student ~%d~ info ----- \n", i+1);
         student[i] = scanInfo();
     }
-    
+
     //printing student info
 
     for (int i = 0; i < 2; i++) {
