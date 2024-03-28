@@ -78,11 +78,16 @@ double m_avg(double buffer[], int avg_size, double new_item)
 {
     // Calculating the moving average of the buffer
     double sum = 0.0;
-    for(int i = 0; i < avg_size; i++)
+    int i;
+
+    // Shift the buffer to the left
+    buffer[i] = buffer[i + 1];
+    buffer[avg_size -1] = new_item;
+
+    for(i = 0; i < avg_size; i++)
     {
         sum += buffer[i];
     }
-    sum += new_item;
 
     // Return the average
 

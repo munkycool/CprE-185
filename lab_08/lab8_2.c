@@ -76,7 +76,7 @@ double m_avg(double buffer[], int avg_size, double new_item);
 -								Implementation
 -----------------------------------------------------------------------------*/
 /*	Main - Run with './ds4rd.exe -t -g -b' piped into STDIN */
-int main(int argc, char* argv[])
+void main(int argc, char* argv[])
 {
 
 
@@ -125,8 +125,27 @@ int main(int argc, char* argv[])
 
 double m_avg(double buffer[], int avg_size, double new_item)
 {
+    // Calculating the moving average of the buffer
+    double sum = 0.0;
+    int i = 0;
 
+    // Shift the buffer to the left
+    
+    for (i = 0; i < avg_size - 1; i++)
+    {
+        buffer[i] = buffer[i + 1];
+    }
 
+    buffer[avg_size -1] = new_item;
+
+    for(i = 0; i < avg_size; i++)
+    {
+        sum += buffer[i];
+    }
+
+    // Return the average
+
+    return sum / (avg_size + 1);
 }
 
 
