@@ -14,7 +14,8 @@
 #include <math.h>
 #include <ncurses.h>
 #include <unistd.h>
-
+#include <locale.h>
+#include <stdlib.h>
 
 /*-----------------------------------------------------------------------------
 -								Defines
@@ -29,7 +30,7 @@
 #define ROWS 80
 
 /* 	Character definitions taken from the ASCII table */
-#define AVATAR 'A'
+#define AVATAR L'0'
 #define WALL '*'
 #define EMPTY_SPACE ' '
 
@@ -60,7 +61,7 @@ void draw_maze(void);
 
 /*	PRE: 0 < x < COLUMNS, 0 < y < ROWS, 0 < use < 255
     POST: Draws character use to the screen and position x,y */
-void draw_character(int x, int y, char use);
+void draw_character(int x, int y, wchar_t use);
 
 /*	PRE: -1.0 < mag < 1.0
     POST: Returns tilt magnitude scaled to -1.0 -> 1.0
@@ -79,7 +80,10 @@ double m_avg(double buffer[], int avg_size, double new_item);
 void main(int argc, char* argv[])
 {
 
+    setlocale(LC_ALL, "");
+
     int y, x;
+    double gx, gy, gz;
 
   if (argc != 2 )
   {
@@ -105,23 +109,60 @@ void main(int argc, char* argv[])
     y = 0;
     x = 0;
 
+    generate_maze(atoi(argv[1]));
+    draw_maze();
+    draw_character(x, y, AVATAR);
+    refresh();
+
     do
     {
 
-        clear();
+        scanf("%lf, %lf, %lf", &gx, &gy, &gz); // Read gyroscope data
 
+        /* Calculate the roll of the DS4 controller using the moving average */
+
+        double roll = calc_roll(gx);
+        double pitch = calc_roll(gy);
+
+        /* Update the avatar position based on the roll */
+
+        if (roll > 0.2 && x < COLUMNS - 1 && MAZE[x+1][y] != WALL)
+        {
+            x++;
+            gx = 0;
+        }
+        else if (roll < -0.2 && x > 0 && MAZE[x-1][y] != WALL)
+        {
+            x--;
+            gx = 0;
+        }
+        if (pitch > 0.2 && y < ROWS - 1 && MAZE[x][y+1] != WALL)
+        {
+            y++;
+            gy = 0;
+        }
+        else if (pitch < -0.2 && y > 0 && MAZE[x][y-1] != WALL)
+        {
+            y--;
+            gy = 0;
+        }
+
+        draw_maze();
         draw_character(x, y, AVATAR);
-
-        y++;
-
         refresh();
 
-        usleep(500000);
+        //usleep(100000); // Sleep for 100ms
 
         /* Read data, update average */
 
         /* Is it time to move?  if so, then move avatar */
 
+        // ending the maze
+
+        if (x == 99 && y == 79)
+        {
+            break;
+        }
 
     } while(1); // Change this to end game at right time
 
@@ -169,8 +210,57 @@ double m_avg(double buffer[], int avg_size, double new_item)
     POST: Draws character use to the screen and position x,y
     THIS CODE FUNCTIONS FOR PLACING THE AVATAR AS PROVIDED.
     DO NOT NEED TO CHANGE THIS FUNCTION. */
-void draw_character(int x, int y, char use)
+void draw_character(int x, int y, wchar_t use)
 {
     mvaddch(y,x,use);
     refresh();
+}
+
+double calc_roll(double x_mag) {
+	if (x_mag < -1) {
+		x_mag = -1;
+	}
+	if (x_mag > 1) {
+		x_mag = 1;
+	}
+	return asin(x_mag) * -1.0;
+}
+
+double calc_pitch(double y_mag) {
+    if (y_mag < -1) {
+        y_mag = -1;
+    }
+    if (y_mag > 1) {
+        y_mag = 1;
+    }
+    return asin(y_mag) * -1.0;
+}
+
+void generate_maze(int difficulty)
+{
+    for (int i = 0; i < COLUMNS; i++)
+    {
+        for (int j = 0; j < ROWS; j++)
+        {
+            if (rand() % 100 < difficulty)
+            {
+                MAZE[i][j] = WALL;
+            }
+            else
+            {
+                MAZE[i][j] = EMPTY_SPACE;
+            }
+        }
+    }
+}
+
+void draw_maze(void)
+{
+    for (int i = 0; i < COLUMNS; i++)
+    {
+        for (int j = 0; j < ROWS; j++)
+        {
+            mvaddch(j, i, MAZE[i][j]);
+        }
+    }
 }
