@@ -79,6 +79,7 @@ double m_avg(double buffer[], int avg_size, double new_item);
 void main(int argc, char* argv[])
 {
 
+    int y, x;
 
   if (argc != 2 )
   {
@@ -100,12 +101,27 @@ void main(int argc, char* argv[])
     /* Read gyroscope data and fill the buffer before continuing */
 
     /* Event loop */
+
+    y = 0;
+    x = 0;
+
     do
     {
+
+        clear();
+
+        draw_character(x, y, AVATAR);
+
+        y++;
+
+        refresh();
+
+        usleep(500000);
 
         /* Read data, update average */
 
         /* Is it time to move?  if so, then move avatar */
+
 
     } while(1); // Change this to end game at right time
 
