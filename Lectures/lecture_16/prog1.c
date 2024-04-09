@@ -29,10 +29,32 @@ int scanInfo () {
     }
 }
 
+double studentGrade (studentRecord student) {
+    double average = 0;
+    int i = 0;
+
+    for (i = 0; i < 3; i++) {
+        average += student.exam[i];
+    }
+
+    return average / 3;
+}
+
 int main () {
+
+    double grade;
 
     studentRecord studentList[40];
 
     scanInfo();
+
+    for (int i = 0; i < 40; i++) {
+        grade = studentGrade(studentList[i]);
+    }
+
+    for (int i = 0; i < 40; i++) {
+        printf("Student name: %s\n", studentList[i].name);
+        printf("Student grade: %lf\n", grade);
+    }
 
 }

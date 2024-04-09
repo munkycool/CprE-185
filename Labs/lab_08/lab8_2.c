@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <locale.h>
 #include <stdlib.h>
+#include <time.h>
+#include <sys/time.h>
 
 /*-----------------------------------------------------------------------------
 -								Defines
@@ -36,7 +38,7 @@
 
 /*	Number of samples taken to form an moving average for the gyroscope data
     Feel free to tweak this. */
-#define NUM_SAMPLES 10
+#define NUM_SAMPLES 1
 
 
 /*-----------------------------------------------------------------------------
@@ -84,6 +86,10 @@ void main(int argc, char* argv[])
 
     int y, x;
     double gx, gy, gz;
+    double fun_gx[NUM_SAMPLES];
+    int loose;
+    int exit_loop = 0;
+    int exit_if = 0;
 
   if (argc != 2 )
   {
@@ -107,7 +113,10 @@ void main(int argc, char* argv[])
     /* Event loop */
 
     y = 0;
-    x = 0;
+    x = 50;
+
+    struct timeval last_action_time;
+    gettimeofday(&last_action_time, NULL);
 
     generate_maze(atoi(argv[1]));
     draw_maze();
@@ -117,39 +126,80 @@ void main(int argc, char* argv[])
     do
     {
 
-        scanf("%lf, %lf, %lf", &gx, &gy, &gz); // Read gyroscope data
+    struct timeval current_time;
+    gettimeofday(&current_time, NULL);
 
+    long elapsed_time = (current_time.tv_sec - last_action_time.tv_sec) * 1000L + 
+                        (current_time.tv_usec - last_action_time.tv_usec) / 1000L;
+
+
+    scanf("%lf, %lf, %lf", &gx, &gy, &gz); // Read gyroscope data
+
+
+
+    if (elapsed_time >= 500) {
         /* Calculate the roll of the DS4 controller using the moving average */
 
-        double roll = calc_roll(gx);
-        double pitch = calc_roll(gy);
+        double roll = m_avg(fun_gx, NUM_SAMPLES, gx);
+
+        roll = roll * -1;
 
         /* Update the avatar position based on the roll */
 
-        if (roll > 0.2 && x < COLUMNS - 1 && MAZE[x+1][y] != WALL)
+        if (MAZE[x][y+1] != WALL)
+        {
+            y++;
+            gx = 0;
+        }
+
+        if (roll > .2 && x < COLUMNS - 1 && MAZE[x+1][y] != WALL)
         {
             x++;
             gx = 0;
         }
-        else if (roll < -0.2 && x > 0 && MAZE[x-1][y] != WALL)
+        else if (roll < .2 && x > 0 && MAZE[x-1][y] != WALL)
         {
             x--;
             gx = 0;
         }
-        if (pitch > 0.2 && y < ROWS - 1 && MAZE[x][y+1] != WALL)
-        {
-            y++;
-            gy = 0;
+/*
+        if (MAZE[x][y+1] == WALL || MAZE[x+1][y] == WALL || MAZE[x-1][y] == WALL) {
+            for (int i = 0; i < COLUMNS; i++)
+            {
+                if (MAZE[i][y+1] == WALL) {
+                    for (int j = 0; j < 1; j++)
+                    {
+                        if (MAZE[i][j+1] == EMPTY_SPACE && MAZE[i][j] == EMPTY_SPACE) {
+                            exit_if = 1;
+                            break;
+                        }
+                }
+                if (exit_if == 0) {
+                    printf("YOU LOSE!\n");
+                    loose = 1;
+                    exit_loop = 1;
+                    break;
+                }
+                else if (exit_if == 1) {
+                    break;
+                }
+            }
+            }
         }
-        else if (pitch < -0.2 && y > 0 && MAZE[x][y-1] != WALL)
-        {
-            y--;
-            gy = 0;
+*/
+
+        if (MAZE[x+1][y] == WALL && MAZE[x-1][y] == WALL && MAZE[x][y+1] == WALL) {
+            printf("YOU LOSE!\n");
+            loose = 1;
+            exit_loop = 1;
+            break;
         }
 
         draw_maze();
         draw_character(x, y, AVATAR);
         refresh();
+
+        last_action_time = current_time;
 
         //usleep(100000); // Sleep for 100ms
 
@@ -159,12 +209,15 @@ void main(int argc, char* argv[])
 
         // ending the maze
 
-        if (x == 99 && y == 79)
-        {
+        if (y == ROWS - 1) {
+            printf("YOU WIN!\n");
+            loose = 0;
+            exit_loop = 1;
             break;
         }
+    }
 
-    } while(1); // Change this to end game at right time
+    } while(exit_loop != 1); // Change this to end game at right time
 
     /* Print the win message */
 
@@ -176,7 +229,12 @@ void main(int argc, char* argv[])
 
   }
 
-    printf("YOU WIN!\n");
+    if (loose == 0) {
+        printf("YOU WIN!\n");
+    }
+    else {
+        printf("YOU LOSE!\n");
+    }
 }
 
 
@@ -238,6 +296,7 @@ double calc_pitch(double y_mag) {
 
 void generate_maze(int difficulty)
 {
+    srand(time(NULL));
     for (int i = 0; i < COLUMNS; i++)
     {
         for (int j = 0; j < ROWS; j++)
