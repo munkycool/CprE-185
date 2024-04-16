@@ -32,9 +32,9 @@
 #define ROWS 80
 
 /* 	Character definitions taken from the ASCII table */
-#define AVATAR L'0'
+#define AVATAR L'ɷ'
 #define WALL '*'
-#define EMPTY_SPACE ' '
+#define EMPTY_SPACE ' ' 
 
 /*	Number of samples taken to form an moving average for the gyroscope data
     Feel free to tweak this. */
