@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include <ncurses/ncurses.h>
+#include <ncurses.h>
 #define MAXWORDS 100
 #define WORDLEN 11
 #define DEBUG 0   // set to 0 to disable debug output
