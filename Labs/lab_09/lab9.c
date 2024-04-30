@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
 	int wordlength = 0;
 	char userSentence[4096] = "";
 	int num, k = 0;
-	int stringLengths[4096];
+	int stringLengths[4096];	
 
 	if (DEBUGM) {
 		printf("Read %d words from %s \n", wordcount, argv[1]);
