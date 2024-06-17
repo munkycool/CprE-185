@@ -1,0 +1,16 @@
+Name: Jameson
+Exam 1: 69.00
+Exam 2: 2.00
+Average score: 35.50
+Name: Peter
+Exam 1: 59.00
+Exam 2: 69.00
+Average score: 64.00
+Name: Gwen
+Exam 1: 666.00
+Exam 2: 33.00
+Average score: 349.50
+Average score for exam 1: 264.67
+Average score for exam 2: 34.67
+Highest score for exam 1: 666.00
+Highest score for exam 2: 69.00

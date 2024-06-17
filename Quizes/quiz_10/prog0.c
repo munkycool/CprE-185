@@ -1,3 +1,5 @@
+// Artemis Tack and Ian Anton 
+
 #include <stdio.h>
 
 // recursive function to calculate the length of a string
